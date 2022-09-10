@@ -12,6 +12,12 @@ Inside folders there is a file called `__init__.py` It is this file that allows 
 
 Whenever we add a file to a folder, we need to add an entry to the `__init__.py` file in the same folder to let the rest of the program know that the new file is there.
 
+You will need to include code in this format
+
+```python
+from Objects.FileName import ClassName
+```
+
 ## RoomObject 
 
 Everything that placed inside a Room, must be a `GameFrame` `RoomObject` (A `TextObject` is also a type of `RoomObject`). You define room objects in the “Objects” folder, and each object is a type of `GameFrame` `RoomObject`. 
