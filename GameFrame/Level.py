@@ -221,7 +221,7 @@ class Level:
 
         if self.running:
             for obj in self.objects:
-                self.init_collision_list(obj)
+                self.init_collision_list(room_object)
 
 
     def load_sound(self, sound_file: str) -> Sound:
