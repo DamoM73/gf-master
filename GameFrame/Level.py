@@ -10,13 +10,8 @@ from GameFrame.RoomObject import RoomObject
 
 
 class Level:
-    """
-    A class for the different levels of the game. A game must have at least one level.
-    """
+
     def __init__(self, screen: Surface, joysticks: Joystick):
-        """
-        Initialised the Level object. Note, there can be no more than two joysticks.
-        """
         self.screen = screen
         self.objects = []
         self.keyboard_objects = []
@@ -24,6 +19,7 @@ class Level:
         self._clock = pygame.time.Clock()
         self.running = False
         self.quitting = False
+        self.background_color = (0, 0, 0)
         self.background_set = False
         self.background_image = 0
         self.background_y = 0
@@ -37,61 +33,50 @@ class Level:
         self.has_buttons_2 = False
         self.has_hat_1 = False
         self.has_hat_2 = False
-        
-        # intialise joystick specs 
         if len(self.joysticks) > 0:
-            # joystick 1 buttons
             buttons = self.joysticks[0].get_numbuttons()
             if buttons > 0:
                 self.has_buttons_1 = True
             for i in range(buttons):
                 self.p1_btns.append(self.joysticks[0].get_button(i))
-            # joystick 1 axes
             axes = self.joysticks[0].get_numaxes()
             if axes > 0:
                 self.has_hat_1 = True
             for i in range(axes):
                 self.p1_btns.append(self.joysticks[0].get_axis(i))
             if len(self.joysticks) > 1:
-                # joystick 2 buttons
                 buttons = self.joysticks[1].get_numbuttons()
                 if buttons > 0:
                     self.has_buttons_2 = True
                 for i in range(buttons):
                     self.p2_btns.append(self.joysticks[1].get_button(i))
-                # joystick 2 axes
                 axes = self.joysticks[1].get_numaxes()
                 if axes > 0:
                     self.has_hat_2 = True
                 for i in range(axes):
                     self.p1_btns.append(self.joysticks[1].get_axis(i))
 
-
     def run(self) -> bool:
-        """
-        Process the game mechanics for this level
-        """
         self.running = True
-        
-        # check for collisions in the level
         for obj in self.objects:
             self.init_collision_list(obj)
 
-        # game loop for this level
         while self.running:
             self._clock.tick(Globals.FRAMES_PER_SECOND)
 
-            # record old object location of each object in level
             for obj in self.objects:
                 obj.prev_x = obj.x
                 obj.prev_y = obj.y
 
             # - Process user events - #
             self.process_user_events()
+            
+            # Call Pre step on all objects
+            for item in self.objects:
+                item.prestep()
 
             events = pygame.event.get()
             for event in events:
-                # - Check for exit event
                 if event.type == pygame.QUIT:
                     self.running = False
                     self.quitting = True
@@ -150,7 +135,7 @@ class Level:
             self.catch_events(events)
 
             # - Clear the screen - #
-            self.screen.fill((0, 0, 0))
+            self.screen.fill(self.background_color)
             # - Add Background if set - #
             if self.background_set:
                 # - Scrolling if set - #
@@ -178,27 +163,15 @@ class Level:
 
         return self.quitting
 
-
     def set_background_image(self, image_file: str):
-        """
-        Adds the provided background image to the level
-        """
         self.background_set = True
         self.background_image = pygame.image.load(os.path.join('Images', image_file)).convert_alpha()
 
-
     def set_background_scroll(self, speed: int):
-        """
-        Enables teh background to scroll at provided speed
-        """
         self.background_scrolling = True
         self.background_scroll_speed = speed
 
-
     def add_room_object(self, room_object: RoomObject):
-        """
-        Adds an RoomObject to the Level
-        """
         # - Add to room objects list - #
         if len(self.objects) == 0:
             self.objects.append(room_object)
@@ -220,17 +193,11 @@ class Level:
             self.mouse_objects.append(room_object)
 
         if self.running:
-            for obj in self.objects:
-                self.init_collision_list(room_object)
-
+            self.dynamic_init_collision_list(room_object)
 
     def load_sound(self, sound_file: str) -> Sound:
-        """
-        Plays the provided sound for the level
-        """
         fq_filename = os.path.join('Sounds', sound_file)
         return pygame.mixer.Sound(fq_filename)
-
 
     def load_image(self, file_name: str) -> str:
         return os.path.join('Images', file_name)
@@ -241,6 +208,14 @@ class Level:
             for obj_instance in self.objects:
                 if type(obj_instance).__name__ == obj_name and obj_instance is not room_object:
                     room_object.collision_objects.append(obj_instance)
+
+    def dynamic_init_collision_list(self, room_object: RoomObject):
+        self.init_collision_list(room_object)
+        obj_type = type(room_object).__name__
+        for obj in self.objects:
+            if obj is not room_object:
+                if obj_type in obj.collision_object_types:
+                    obj.collision_objects.append(room_object)
 
     def catch_events(self, events):
         pass

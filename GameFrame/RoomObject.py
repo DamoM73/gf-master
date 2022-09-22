@@ -59,6 +59,9 @@ class RoomObject:
             if list_obj is obj:
                 self.collision_objects.pop(index)
 
+    def prestep(self):
+        pass
+    
     def step(self):
         pass
 

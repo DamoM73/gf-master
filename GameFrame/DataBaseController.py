@@ -3,28 +3,18 @@ import sqlite3
 
 
 class DataBaseController:
-    """
-    A class for accessing a sqlite database
-    """
-    
     def __init__(self, dbase_file_name: str):
-        """
-        Connects to the provided database
-        """
         app_file_path = os.path.join(os.path.dirname(__file__), dbase_file_name)
         self.app_db = sqlite3.connect(app_file_path)
         self.app_cursor = self.app_db.cursor()
 
     def close(self):
-        """
-        Closes database connection and writes cache to the drive.
-        """
         self.app_db.close()
 
     # ------------------------------ #
     # -- This is an example query -- #
     # ------------------------------ #
-    '''
+'''
     def get_lesson(self, topic):
         self.app_cursor.execute(
             """
@@ -35,4 +25,4 @@ class DataBaseController:
             {'topic': topic}
         )
         return self.app_cursor.fetchone()[0]
-    '''
+'''
